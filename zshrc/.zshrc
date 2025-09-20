@@ -1,23 +1,40 @@
-eval "$(starship init zsh)"
-eval "$(zoxide init zsh)"
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+plugins=(git zsh-autosuggestions zsh-completions zsh-vi-mode)
+source $ZSH/oh-my-zsh.sh
+
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
 export EDITOR="nvim"
 export SUDO_EDITOR="$EDITOR"
-export PGHOST="/var/run/postgresql"
-
 
 export PATH=$PATH:/usr/local/go/bin
+export PATH="$PATH:/home/amir/.local/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+eval "$(~/.local/bin/mise activate zsh)"
+
+ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
 
 HISTFILE=~/.history
 HISTSIZE=10000
 SAVEHIST=50000
-
 setopt inc_append_history
 
-# Set up fzf key bindings and fuzzy completion
-source <(fzf --zsh)
+if [ -f ~/.aliases ]; then
+  source ~/.aliases
+fi
 
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$HOME/.local/share/omarchy/bin:$PATH"
-eval "$(~/.local/bin/mise activate zsh)"
+alias tm=new_tmux
+
+source <(fzf --zsh)
 
 new_tmux () {
   session_dir=$(zoxide query --list | fzf)
@@ -40,9 +57,8 @@ new_tmux () {
     fi
   fi
 
-  if [-s "$session_name" ]; then
+  if [ -n "$notification" ]; then
     notify-send "$notification"
   fi
 }
 
-alias tm=new_tmux
